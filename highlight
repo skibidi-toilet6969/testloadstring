@@ -1,0 +1,46 @@
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+
+-- Function to create a highlight for a humanoid
+local function highlightHumanoid(humanoid, color)
+    -- Create a new highlight
+    local highlight = Instance.new("Highlight")
+    highlight.Adornee = humanoid.Parent -- Set the highlight to the model
+    highlight.FillColor = color -- Set the highlight color
+    highlight.FillTransparency = 0.5 -- Transparency of the highlight
+    highlight.OutlineColor = Color3.fromRGB(255, 255, 255) -- Outline color (white)
+    highlight.OutlineTransparency = 0 -- Outline transparency
+    highlight.Parent = humanoid.Parent -- Parent it to the humanoid's model
+end
+
+-- Function to highlight all humanoids of players in the game
+local function highlightAllHumanoids()
+    local playerPosition = Character.PrimaryPart.Position
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer then
+            local character = player.Character
+            if character and character:FindFirstChild("Humanoid") then
+                local humanoid = character.Humanoid
+                local distance = (playerPosition - character.PrimaryPart.Position).magnitude
+                
+                -- Clear any existing highlights
+                for _, child in ipairs(character:GetChildren()) do
+                    if child:IsA("Highlight") then
+                        child:Destroy()
+                    end
+                end
+                
+                -- Set color based on distance
+                local color = distance < 50 and Color3.fromRGB(255, 0, 0) or Color3.fromRGB(0, 255, 0) -- Red if near, green if far
+                highlightHumanoid(humanoid, color)
+            end
+        end
+    end
+end
+
+-- Loop to highlight all humanoids every 5 seconds
+while true do
+    highlightAllHumanoids()
+    wait(0.05) -- Wait for 5 seconds 
+end
